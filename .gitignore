@@ -1,0 +1,35 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Project specific - ignore test PDFs and outputs
+*.pdf
+test_output*.md
+output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Old files
+main.py
+pdf_to_markdown.py
