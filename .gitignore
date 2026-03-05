@@ -23,13 +23,13 @@ htmlcov/
 
 # Project specific - ignore test PDFs and outputs
 *.pdf
-test_output*.md
+*.png
+test_*.md
+test_*_images/
+*_完整版.md
+*_完整版_images/
 output/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Old files
-main.py
-pdf_to_markdown.py

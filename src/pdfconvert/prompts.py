@@ -30,17 +30,53 @@ Rules:
 DIAGRAM_DESCRIBE_PROMPT = """You are a technical diagram analyst.
 Describe the diagram/chart/figure in this image for a Markdown document.
 Rules:
-- Start with a brief one-line caption: **Figure: [description]**
-- Describe the diagram structure, labels, axes, and data trends.
-- If it contains numerical data, extract key values into a Markdown table.
-- If it is a circuit diagram or physics diagram, describe components and their connections.
-- Keep the description concise but complete enough to understand without seeing the image."""
+- Use [IMAGE_PLACEHOLDER: brief description | bbox: y1,y2] to mark where the diagram should be cropped
+- bbox coordinates are vertical percentages (0-100) indicating the top and bottom of the region to crop
+- The region should include the diagram AND any closely related labels, captions, or definitions
+- Exclude unrelated text that appears before or after the diagram
+- After the placeholder, provide a detailed text description of the diagram
+- Describe the diagram structure, labels, axes, and data trends
+- If it contains numerical data, extract key values into a Markdown table
+
+Example output:
+[IMAGE_PLACEHOLDER: Circuit diagram showing resistors R1, R2 in series with voltage source V | bbox: 20,45]
+
+The circuit consists of two resistors connected in series..."""
 
 MIXED_EXTRACT_PROMPT = """You are a document analysis assistant.
 This page contains mixed content (text, formulas, and/or diagrams).
 Extract and convert ALL content to Markdown:
 - Plain text: preserve as-is with Markdown formatting
 - Mathematical formulas: convert to LaTeX ($...$ for inline, $$...$$ for block)
-- Diagrams/figures: describe with **Figure: [description]** followed by a brief description
+- Diagrams/figures: use [IMAGE_PLACEHOLDER: brief description | bbox: y1,y2] to mark where each diagram should be cropped
+  - bbox coordinates are VERTICAL percentages (0-100) measured from the TOP of the page
+  - y1 = percentage where the diagram region STARTS (include any title/caption above the diagram)
+  - y2 = percentage where the diagram region ENDS (include any formulas/labels below the diagram)
+  - The cropped region should be GENEROUS - include the complete diagram with all related text
+  - Example: if a diagram with labels occupies roughly the middle third of the page, use bbox: 30,70
+  - If multiple diagrams exist, mark each one separately with its own bbox
 - Tables: convert to Markdown table syntax
+- Place [IMAGE_PLACEHOLDER] at the appropriate position in the content flow
+
+IMPORTANT: When estimating bbox coordinates, think about the vertical position on the page:
+- Top of page = 0%
+- Middle of page = 50%
+- Bottom of page = 100%
+- A diagram in the upper portion might be bbox: 20,45
+- A diagram in the middle might be bbox: 40,65
+- A diagram in the lower portion might be bbox: 60,85
+
+Example:
+The concept of circular motion involves:
+
+**Definition:** Angular displacement (θ): The angle swept by the object as it moves round.
+
+[IMAGE_PLACEHOLDER: Circular motion diagram showing radius r, arc length s, angle θ, with formulas s=rθ, v=rω | bbox: 20,45]
+
+The centripetal acceleration is given by: $a = v^2/r$
+
+For a conical pendulum:
+
+[IMAGE_PLACEHOLDER: Conical pendulum diagram with tension T, angle θ, and force equations | bbox: 55,75]
+
 Output only the converted content, no commentary."""

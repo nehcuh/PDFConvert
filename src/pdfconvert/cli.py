@@ -18,7 +18,8 @@ PROMPT_MAP = {
 }
 
 
-def convert(pdf_path: str, output_path: str | None = None, dpi: int = DEFAULT_DPI, max_pages: int | None = None) -> Path:
+def convert(pdf_path: str, output_path: str | None = None, dpi: int = DEFAULT_DPI,
+            max_pages: int | None = None, save_images: bool = True) -> Path:
     print("检查 LM Studio 模型状态...")
     model_id = ensure_model_loaded()
     print(f"使用模型: {model_id}")
@@ -45,11 +46,12 @@ def convert(pdf_path: str, output_path: str | None = None, dpi: int = DEFAULT_DP
             "page_num": i,
             "content": content,
             "content_type": content_type.value,
+            "image": image,  # 保存原始图片对象
         })
 
     stem = Path(pdf_path).stem
     out_path = output_path or f"{stem}.md"
-    md_text = build_markdown(pages, title=stem)
+    md_text = build_markdown(pages, title=stem, output_path=out_path, save_images=save_images)
     result = save_markdown(md_text, out_path)
     print(f"\n输出文件: {result}")
     return result
@@ -61,10 +63,14 @@ def main():
     parser.add_argument("-o", "--output", help="输出 Markdown 文件路径")
     parser.add_argument("--dpi", type=int, default=DEFAULT_DPI, help=f"渲染 DPI（默认 {DEFAULT_DPI}）")
     parser.add_argument("--max-pages", type=int, help="最多处理的页数（用于测试）")
+    parser.add_argument("--save-images", action="store_true", default=True,
+                        help="保存页面图片到输出目录（默认启用）")
+    parser.add_argument("--no-save-images", dest="save_images", action="store_false",
+                        help="不保存页面图片")
     args = parser.parse_args()
 
     try:
-        convert(args.pdf, args.output, args.dpi, args.max_pages)
+        convert(args.pdf, args.output, args.dpi, args.max_pages, args.save_images)
     except FileNotFoundError as e:
         print(f"错误: {e}", file=sys.stderr)
         sys.exit(1)
